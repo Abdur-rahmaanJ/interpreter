@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {margin: 0}
+#left, #right {float: left; width: 50%; height: 100vh; 
+box-sizing: border-box}
+#left {background-color: #EFDB2F; padding: 24px}
+#right {background-color: #CDBA1E; padding: 24px; 
+font-size: 24px}
+textarea {background-color: #EFDB2F; padding: 0; border: none; 
+width: 100%; height: 100%; font-size: 24px; resize: none; 
+outline: 0}
+#myOutput {background-color: #CDBA1E}
+</style>
+<title>cheeze</title>
+</head>
+<body>
+<div id="left">
+	<textarea id="myInput" oninput="trans()" ondblclick="yayy()"></textarea>
+</div>
+<div id="right">
+	<textarea id="myOutput" readonly></textarea>
+</div>
+<script src="../../xampp/htdocs/js/jquery.min.js">
+</script>
+<script>
+window.onload = trans;
+
+$("textarea").on("keydown", function(e) {
+    if(e.keyCode == 9) {
+		e.preventDefault();
+		for(var i = 0; i < 4; i++) {
+        	var start = this.selectionStart;
+			end = this.selectionEnd;
+			value = $(this).val();
+        	$(this).val(value.substring(0, start) + " " + value.substring(end));
+        	this.selectionStart = this.selectionEnd = start + 1;
+      }
+    }
+	trans();
+}); 
+
+function trans() {
+	$("#myOutput").val($("#myInput").val());
+	yayy()
+}
+
+function yayy() {
+	var lines = $("#myOutput").val().split("\n").map(x => x.trim());
+	for (var i = 0; i < lines.length; i++) {
+		if (lines[i] == "") continue;
+		if (/^[A-z_] *\= *.+$/.test(lines[i])) {
+			lines[i] = "var " + lines[i];
+		} else if (/^print\(.+\)$/.test(lines[i])) {
+			try {
+				$("#myOutput").val($("#myOutput").val() + "\nOutput: " + eval(lines[i].slice(6, -1)));
+			} catch (e) {
+				$("#myOutput").val(`Error ${e.message} on line ${i+1}`);
+			}
+			continue;
+		}
+		try {
+			lines[i] = eval(lines[i]);
+		} catch (e) {
+			$("#myOutput").val(`Error ${e.message} on line ${i+1}`);
+		}
+	}
+}
+
+String.prototype.reverse = function() {
+	return this.split("").reverse().join("");
+}
+
+Array.prototype.sum = function() {
+	return this.reduce((a, b) => a + b);
+}
+</script>
+</body>
+</html>
